@@ -7,16 +7,28 @@ interface SutTypes {
   emailValidatorStub: EmailValidator
 }
 
-const makeSut = (): SutTypes => {
-  // mocking email validator, is not for production
-  // STUB (test duble - duble de teste)
+const makeEmailValidator = (): EmailValidator => {
   class EmailValidatorStub implements EmailValidator {
     isValid (email: string): boolean {
       return true
     }
   }
+  return new EmailValidatorStub()
+}
 
-  const emailValidatorStub = new EmailValidatorStub()
+const makeEmailValidatorWithError = (): EmailValidator => {
+  class EmailValidatorStub implements EmailValidator {
+    isValid (email: string): boolean {
+      throw new Error()
+    }
+  }
+  return new EmailValidatorStub()
+}
+
+const makeSut = (): SutTypes => {
+  // mocking email validator, is not for production
+  // STUB (test duble - duble de teste)
+  const emailValidatorStub = makeEmailValidator()
   const sut = new SignUpController(emailValidatorStub) // dependency injection
 
   return {
@@ -143,13 +155,7 @@ describe('SignUp Controller', () => {
 
   test('should return 500 if EmailValidator throws an Exception', () => {
     // nesse caso nao podemos usar o makeSut, pq ele esta sempre retornando true e ele esta sempre retornando true
-    class EmailValidatorStub implements EmailValidator {
-      isValid (email: string): boolean {
-        throw new Error()
-      }
-    }
-
-    const emailValidatorStub = new EmailValidatorStub()
+    const emailValidatorStub = makeEmailValidatorWithError()
     const sut = new SignUpController(emailValidatorStub)
 
     const httpRequest = {
